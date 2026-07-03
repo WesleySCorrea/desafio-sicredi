@@ -1,0 +1,15 @@
+package com.desafio_sicredi.adapters.out.persistence.creditOperationAssociation;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "credit_operation_association")
+public class CreditOperationAssociationEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long idCreditOperationAssociation;
+
+    @Column(name = "id_associado")
+    private Long idAssociado;
+}

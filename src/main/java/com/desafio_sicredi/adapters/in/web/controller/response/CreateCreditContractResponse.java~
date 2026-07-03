@@ -1,0 +1,17 @@
+package com.desafio_sicredi.adapters.in.web.response;
+
+import com.desafio_sicredi.domain.model.CreditContract;
+
+public record CreateCreditContractResponse (
+
+        Long idOperacaoCredito
+
+) {
+
+    public static CreateCreditContractResponse from(CreditContract contract) {
+
+        return new CreateCreditContractResponse(
+                contract.getIdOperacaoCredito()
+        );
+    }
+}

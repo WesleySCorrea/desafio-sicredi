@@ -1,0 +1,4 @@
+package com.desafio_sicredi.adapters.out.persistence;
+
+public class CreditContractJpaRepository {
+}

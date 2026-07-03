@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  desafio-sicredi-postgres:
+    image: postgres:17
+    container_name: desafio-sicredi-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: desafio_sicredi
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      retries: 5
+      timeout: 5s
+
+  desafio-sicredi-backend:
+    build: .
+    container_name: desafio-sicredi-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/desafio_sicredi
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      CREDIT_VALIDATION_URL: https://desafio-credito-sicredi.wiremockapi.cloud/
+
+volumes:
+  postgres_data:

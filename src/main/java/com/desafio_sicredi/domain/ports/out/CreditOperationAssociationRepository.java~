@@ -1,0 +1,2 @@
+package com.desafio_sicredi.domain.ports.out;public interface CreditOperationAssociationRepository {
+}

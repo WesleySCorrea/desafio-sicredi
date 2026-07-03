@@ -1,0 +1,33 @@
+package com.desafio_sicredi.adapters.in.web;
+
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.desafio_sicredi.adapters.in.CreateCreditContractUseCase;
+import com.desafio_sicredi.adapters.in.web.response.CreditContractResponse;
+import com.desafio_sicredi.adapters.in.web.request.CreateCreditContractRequest;
+
+@RestController
+@RequestMapping("/contract-credit")
+public class ContractCreditController {
+
+    private final CreateCreditContractUseCase useCase;
+
+    public ContractCreditController(CreateCreditContractUseCase useCase) {
+        this.useCase = useCase;
+    }
+
+    @PostMapping
+    public ResponseEntity<CreditContractResponse> create(
+            @Valid @RequestBody CreateCreditContractRequest request
+    ) {
+
+        CreditContractResponse response = useCase.createContract(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+}

@@ -1,0 +1,4 @@
+package com.desafio_sicredi.domain.exception;
+
+public class NotFoundException {
+}

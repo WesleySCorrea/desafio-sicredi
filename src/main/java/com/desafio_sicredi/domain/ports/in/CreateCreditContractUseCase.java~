@@ -1,0 +1,12 @@
+package com.desafio_sicredi.domain.ports.in;
+
+import com.desafio_sicredi.adapters.in.web.response.CreditContractResponse;
+import com.desafio_sicredi.adapters.in.web.request.CreateCreditContractRequest;
+import com.desafio_sicredi.adapters.in.web.response.CreateCreditContractResponse;
+
+public interface CreateCreditContractUseCase {
+
+    CreateCreditContractResponse createContract(CreateCreditContractRequest request);
+
+    CreditContractResponse findCreditById(Long id);
+}

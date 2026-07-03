@@ -1,0 +1,20 @@
+spring.application.name=desafio-sicredi
+
+server.servlet.context-path=/api/v1
+
+# Datasource
+spring.datasource.url=${DB_URL:jdbc:postgresql://localhost:5432/desafio_sicredi}
+spring.datasource.username=${DB_USERNAME:postgres}
+spring.datasource.password=${DB_PASSWORD:postgres}
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# JPA
+spring.jpa.hibernate.ddl-auto=validate
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.format_sql=false
+
+# Flyway
+spring.flyway.enabled=true
+spring.flyway.locations=classpath:db/migration
+
+credit.validation.url=https://desafio-credito-sicredi.wiremockapi.cloud/

@@ -1,0 +1,153 @@
+package com.desafio_sicredi.adapters.in.web.controller;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+import com.desafio_sicredi.domain.exception.BusinessException;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import tools.jackson.databind.ObjectMapper;
+import com.desafio_sicredi.domain.model.SegmentType;
+import org.springframework.test.web.servlet.MockMvc;
+import com.desafio_sicredi.domain.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import com.desafio_sicredi.domain.ports.in.CreateCreditContractUseCase;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import com.desafio_sicredi.adapters.in.web.controller.response.CreditContractResponse;
+import com.desafio_sicredi.adapters.in.web.controller.response.CreateCreditContractResponse;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+
+@WebMvcTest(ContractCreditController.class)
+public class ContractCreditControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private CreateCreditContractUseCase useCase;
+
+    @Test
+    void deveCriarContratoComSucesso() throws Exception {
+
+        CreateCreditContractResponse response = new CreateCreditContractResponse(1L);
+
+        when(useCase.createContract(any()))
+                .thenReturn(response);
+
+        String json = """
+        {
+          "idAssociado": 1,
+          "valorOperacao": 5000,
+          "segmento": "AGRO",
+          "codigoProdutoCredito": "903C",
+          "codigoConta": "1234567890",
+          "areaBeneficiadaHa": 10
+        }
+        """;
+
+        mockMvc.perform(post("/contract-credit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.idOperacaoCredito").value(1));
+    }
+
+    @Test
+    void deveRetornar400QuandoRequestInvalido() throws Exception {
+
+        String json = """
+        {
+          "idAssociado": null,
+          "valorOperacao": 0,
+          "segmento": "AGRO",
+          "codigoProdutoCredito": "903C",
+          "codigoConta": "123",
+          "areaBeneficiadaHa": 0
+        }
+        """;
+
+        mockMvc.perform(post("/contract-credit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void deveBuscarContratoPorIdComSucesso() throws Exception {
+
+        CreditContractResponse response = new CreditContractResponse(
+                1L,
+                1L,
+                new BigDecimal("5000"),
+                SegmentType.AGRO,
+                "903C",
+                "1234567890",
+                new BigDecimal("10"),
+                LocalDateTime.now()
+        );
+
+        when(useCase.findCreditById(1L))
+                .thenReturn(response);
+
+        mockMvc.perform(get("/contract-credit/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.idOperacaoCredito").value(1));
+    }
+
+    @Test
+    void deveRetornar404QuandoNaoEncontrarContrato() throws Exception {
+
+        when(useCase.findCreditById(1L))
+                .thenThrow(new NotFoundException("Contrato não encontrado"));
+
+        mockMvc.perform(get("/contract-credit/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deveRetornar500QuandoErroInesperado() throws Exception {
+
+        when(useCase.findCreditById(1L))
+                .thenThrow(new RuntimeException("erro inesperado"));
+
+        mockMvc.perform(get("/contract-credit/{id}", 1L))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message").value("Erro interno no servidor"))
+                .andExpect(jsonPath("$.status").value(500));
+    }
+
+    @Test
+    void deveRetornar400QuandoCreditoNaoAprovado() throws Exception {
+
+        when(useCase.createContract(any()))
+                .thenThrow(new BusinessException("Credito não aprovado."));
+
+        mockMvc.perform(post("/contract-credit")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                    {
+                      "idAssociado": 1,
+                      "valorOperacao": 5000,
+                      "segmento": "PF",
+                      "codigoProdutoCredito": "903C",
+                      "codigoConta": "1234567890",
+                      "areaBeneficiadaHa": 10
+                    }
+                    """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Credito não aprovado."))
+                .andExpect(jsonPath("$.status").value(400));
+    }
+}
