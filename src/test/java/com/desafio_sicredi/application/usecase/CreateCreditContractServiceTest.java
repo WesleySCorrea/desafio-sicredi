@@ -11,10 +11,10 @@ import com.desafio_sicredi.domain.exception.NotFoundException;
 import com.desafio_sicredi.domain.exception.BusinessException;
 import com.desafio_sicredi.domain.ports.out.CreditValidationPort;
 import com.desafio_sicredi.domain.ports.out.CreditContractRepository;
+import com.desafio_sicredi.application.command.CreateCreditContractCommand;
 import com.desafio_sicredi.domain.ports.out.CreditOperationAssociationRepository;
 import com.desafio_sicredi.adapters.out.creditvalidation.response.ValidationResponse;
 import com.desafio_sicredi.adapters.in.web.controller.response.CreditContractResponse;
-import com.desafio_sicredi.adapters.in.web.controller.request.CreateCreditContractRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -47,7 +47,7 @@ class CreateCreditContractServiceTest {
     @Test
     void deveCriarContratoAgroSemAssociacao() {
 
-        CreateCreditContractRequest request = new CreateCreditContractRequest(
+        CreateCreditContractCommand command = new CreateCreditContractCommand(
                 1L,
                 new BigDecimal("5000"),
                 SegmentType.AGRO,
@@ -62,7 +62,7 @@ class CreateCreditContractServiceTest {
                 .thenAnswer(inv -> inv.getArgument(0));
 
         // WHEN
-        var response = service.createContract(request);
+        var response = service.createContract(command);
 
         // THEN
         assertNotNull(response);
@@ -74,10 +74,10 @@ class CreateCreditContractServiceTest {
     @Test
     void deveSalvarAssociacaoQuandoPJ() {
 
-        CreateCreditContractRequest request = new CreateCreditContractRequest(
+        CreateCreditContractCommand command = new CreateCreditContractCommand(
                 1L,
                 new BigDecimal("5000"),
-                SegmentType.PJ,
+                SegmentType.AGRO,
                 "903C",
                 "1234567890",
                 new BigDecimal("10")
@@ -100,7 +100,7 @@ class CreateCreditContractServiceTest {
                 .thenReturn(saved);
 
         // WHEN
-        service.createContract(request);
+        service.createContract(command);
 
         // THEN
         verify(repository).save(any());
@@ -111,7 +111,7 @@ class CreateCreditContractServiceTest {
     void deveFalharQuandoAreaBeneficiadaForNula() {
 
         // GIVEN
-        CreateCreditContractRequest request = new CreateCreditContractRequest(
+        CreateCreditContractCommand command = new CreateCreditContractCommand(
                 1L,
                 new BigDecimal("5000"),
                 SegmentType.AGRO,
@@ -122,7 +122,7 @@ class CreateCreditContractServiceTest {
 
         // WHEN + THEN
         var ex = assertThrows(BusinessException.class,
-                () -> service.createContract(request));
+                () -> service.createContract(command));
 
         assertEquals(
                 "Área beneficiada é obrigatória para o segmento AGRO.",
@@ -135,7 +135,7 @@ class CreateCreditContractServiceTest {
     @Test
     void deveFalharQuandoAreaBeneficiadaForZeroOuNegativa() {
 
-        CreateCreditContractRequest request = new CreateCreditContractRequest(
+        CreateCreditContractCommand command = new CreateCreditContractCommand(
                 1L,
                 new BigDecimal("5000"),
                 SegmentType.AGRO,
@@ -145,7 +145,7 @@ class CreateCreditContractServiceTest {
         );
 
         var ex = assertThrows(BusinessException.class,
-                () -> service.createContract(request));
+                () -> service.createContract(command));
 
         assertEquals(
                 "Área beneficiada deve ser maior que zero.",
@@ -158,7 +158,7 @@ class CreateCreditContractServiceTest {
     @Test
     void deveFalharQuandoCreditoNaoAprovado() {
 
-        CreateCreditContractRequest request = new CreateCreditContractRequest(
+        CreateCreditContractCommand command = new CreateCreditContractCommand(
                 1L,
                 new BigDecimal("5000"),
                 SegmentType.PF,
@@ -171,7 +171,7 @@ class CreateCreditContractServiceTest {
                 .thenReturn(new ValidationResponse(false));
 
         var ex = assertThrows(BusinessException.class,
-                () -> service.createContract(request));
+                () -> service.createContract(command));
 
         assertEquals("Credito não aprovado.", ex.getMessage());
 

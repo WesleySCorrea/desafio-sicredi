@@ -14,7 +14,7 @@ import java.math.BigDecimal;
         name = "credit-validation",
         url = "${credit.validation.url}"
 )
-public interface CreditValidationClient extends CreditValidationPort {
+public interface CreditValidationClient {
 
     @GetMapping("/produtos-credito/{codigoProdutoCredito}/permite-contratacao")
     ValidationResponse validate(

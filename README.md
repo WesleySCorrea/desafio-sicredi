@@ -110,11 +110,12 @@ A API ficará disponível na porta 8080.
 
 ## Variáveis de Ambiente
 
-Variável                  Descrição
-`DB_URL`                  URL do PostgreSQL
-`DB_USERNAME`             Usuário do banco
-`DB_PASSWORD`             Senha do banco
-`CREDIT_VALIDATION_URL`   URL do serviço de validação
+| Variável | Descrição |
+|----------|-----------|
+| `DB_URL` | URL do PostgreSQL |
+| `DB_USERNAME` | Usuário do banco de dados |
+| `DB_PASSWORD` | Senha do banco de dados |
+| `CREDIT_VALIDATION_URL` | URL do serviço de validação de crédito |
 
 ---
 

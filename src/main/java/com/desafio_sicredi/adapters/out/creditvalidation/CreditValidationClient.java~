@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 )
 public interface CreditValidationClient extends CreditValidationPort {
 
-    @GetMapping("/produtos-credito/{codigoProdutoCredito}/permitecontratacao")
+    @GetMapping("/produtos-credito/{codigoProdutoCredito}/permite-contratacao")
     ValidationResponse validate(
             @PathVariable String codigoProdutoCredito,
             @RequestParam SegmentType segmento,

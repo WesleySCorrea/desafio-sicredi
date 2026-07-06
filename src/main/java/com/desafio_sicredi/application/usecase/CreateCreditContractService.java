@@ -10,10 +10,10 @@ import com.desafio_sicredi.domain.ports.out.CreditValidationPort;
 import com.desafio_sicredi.domain.model.CreditOperationAssociation;
 import com.desafio_sicredi.domain.ports.out.CreditContractRepository;
 import com.desafio_sicredi.domain.ports.in.CreateCreditContractUseCase;
+import com.desafio_sicredi.application.command.CreateCreditContractCommand;
 import com.desafio_sicredi.domain.ports.out.CreditOperationAssociationRepository;
 import com.desafio_sicredi.adapters.out.creditvalidation.response.ValidationResponse;
 import com.desafio_sicredi.adapters.in.web.controller.response.CreditContractResponse;
-import com.desafio_sicredi.adapters.in.web.controller.request.CreateCreditContractRequest;
 import com.desafio_sicredi.adapters.in.web.controller.response.CreateCreditContractResponse;
 
 @Service
@@ -31,15 +31,15 @@ public class CreateCreditContractService implements CreateCreditContractUseCase 
 
     @Override
     @Transactional
-    public CreateCreditContractResponse createContract(CreateCreditContractRequest request) {
+    public CreateCreditContractResponse createContract(CreateCreditContractCommand comand) {
 
-        if (request.segmento() == SegmentType.AGRO) {
-            validateAgroCredit(request);
+        if (comand.segmento() == SegmentType.AGRO) {
+            validateAgroCredit(comand);
         }
 
-        validateCreditContract(request);
+        validateCreditContract(comand);
 
-        CreditContract contract = buildContract(request);
+        CreditContract contract = buildContract(comand);
 
         CreditContract saved = saveContract(contract);
 
@@ -59,27 +59,27 @@ public class CreateCreditContractService implements CreateCreditContractUseCase 
         return CreditContractResponse.from(contract);
     }
 
-    private void validateAgroCredit(CreateCreditContractRequest request) {
+    private void validateAgroCredit(CreateCreditContractCommand comand) {
 
-        if (request.areaBeneficiadaHa() == null) {
+        if (comand.areaBeneficiadaHa() == null) {
             throw new BusinessException(
                     "Área beneficiada é obrigatória para o segmento AGRO."
             );
         }
 
-        if (request.areaBeneficiadaHa().signum() <= 0) {
+        if (comand.areaBeneficiadaHa().signum() <= 0) {
             throw new BusinessException(
                     "Área beneficiada deve ser maior que zero."
             );
         }
     }
 
-    private void validateCreditContract(CreateCreditContractRequest request) {
+    private void validateCreditContract(CreateCreditContractCommand comand) {
 
         ValidationResponse response = validationPort.validate(
-                        request.codigoProdutoCredito(),
-                        request.segmento(),
-                        request.valorOperacao()
+                    comand.codigoProdutoCredito(),
+                    comand.segmento(),
+                    comand.valorOperacao()
                 );
 
         if (!response.permiteContratar()) {
@@ -87,15 +87,15 @@ public class CreateCreditContractService implements CreateCreditContractUseCase 
         }
     }
 
-    private CreditContract buildContract(CreateCreditContractRequest contract) {
+    private CreditContract buildContract(CreateCreditContractCommand comand) {
 
         return new CreditContract(
-                contract.idAssociado(),
-                contract.valorOperacao(),
-                contract.segmento(),
-                contract.codigoProdutoCredito(),
-                contract.codigoConta(),
-                contract.areaBeneficiadaHa()
+                comand.idAssociado(),
+                comand.valorOperacao(),
+                comand.segmento(),
+                comand.codigoProdutoCredito(),
+                comand.codigoConta(),
+                comand.areaBeneficiadaHa()
         );
     }
 
